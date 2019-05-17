@@ -1,2 +1,13 @@
+# Files
+.exe
+
 # Folders
 .vs
+x64/
+Debug/
+include/
+Libraries/
+RayTheTracer/Debug/
+RayTheTracer/include/
+RayTheTracer/x64/
+RayTheTracer/Libraries/
