@@ -132,11 +132,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Libraries\glad.c" />
-    <ClCompile Include="Source\main.cpp" />
-    <ClCompile Include="Source\shaders.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\shaders.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\shaders.h" />
+    <ClInclude Include="headers\shaders.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

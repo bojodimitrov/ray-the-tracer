@@ -3,7 +3,7 @@
 
 #include <glm/glm/glm.hpp>
 #include <glm/glm/ext.hpp>
-#include <shaders.h>
+#include <../headers/shaders.h>
 #include <cstdlib>
 #include <cstdio>
 
