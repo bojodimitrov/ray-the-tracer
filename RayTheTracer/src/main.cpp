@@ -1,9 +1,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
 
-#include <glm/glm/glm.hpp>
-#include <glm/glm/ext.hpp>
-#include <../headers/shaders.h>
+#include <../headers/shaders.hpp>
 #include <cstdlib>
 #include <cstdio>
 

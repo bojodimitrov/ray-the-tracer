@@ -136,7 +136,7 @@
     <ClCompile Include="src\shaders.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="headers\shaders.h" />
+    <ClInclude Include="headers\shaders.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

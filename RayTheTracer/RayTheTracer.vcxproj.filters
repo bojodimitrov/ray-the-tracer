@@ -26,7 +26,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="headers\shaders.h">
+    <ClInclude Include="headers\shaders.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
