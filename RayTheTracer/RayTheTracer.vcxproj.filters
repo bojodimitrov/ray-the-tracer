@@ -24,10 +24,25 @@
     <ClCompile Include="src\shaders.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\shapes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\structs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\shaders.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\fragment_shader.fsh" />
+    <None Include="shaders\lighting_shader.vsh" />
+    <None Include="shaders\vertex_shader.vsh" />
+    <None Include="shaders\axis_shader.fsh" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="shaders\lighting_shader.fsh" />
   </ItemGroup>
 </Project>

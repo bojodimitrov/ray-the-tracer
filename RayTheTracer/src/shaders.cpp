@@ -1,35 +1,44 @@
 #include <string>
 #include <glad/glad.h>
 #include <cstdio>
+#include <fstream>
+#include <sstream>
 #include <iostream>
+#include "../headers/shaders.hpp"
+#include <glm/gtc/type_ptr.inl>
 
 #ifndef SHADERS_H
 #define SHADERS_H
 
-static const char* vertex_shader_text =
-"#version 110\n"
-"attribute vec3 vCol;\n"
-"attribute vec3 vPos;\n"
-"uniform mat4 model;\n"
-"uniform mat4 view;\n"
-"uniform mat4 projection;\n"
-"varying vec3 color;\n"
-"void main()\n"
-"{\n"
-"    gl_Position = projection * view * model * vec4(vPos, 1.0);\n"
-"    color = vCol;\n"
-"}\n";
-static const char* fragment_shader_text =
-"#version 110\n"
-"varying vec3 color;\n"
-"void main()\n"
-"{\n"
-"    gl_FragColor = vec4(color, 1.0);\n"
-"}\n";
-
-
-GLuint setup_shaders()
+std::string shaders::read_shader(const char* shader)
 {
+	std::ifstream shader_file;
+	std::string shader_code;
+	shader_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+	try
+	{
+		shader_file.open(shader);
+		std::stringstream str_stream;
+		str_stream << shader_file.rdbuf();
+		shader_code = str_stream.str();
+	}
+	catch (std::ifstream::failure e)
+	{
+		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+	}
+	shader_file.close();
+	return shader_code;
+}
+
+shaders::shaders(const char* vertex_shader_path, const char* fragment_shader_path)
+{
+	//auto vertex_shader_str = read_shader("./src/vertex_shader");
+	auto vertex_shader_str = this->read_shader(vertex_shader_path);
+	auto vertex_shader_text = vertex_shader_str.c_str();
+	//auto fragment_shader_str = read_shader("./src/fragment_shader");
+	auto fragment_shader_str = this->read_shader(fragment_shader_path);
+	auto fragment_shader_text = fragment_shader_str.c_str();
+
 	const auto vertex_shader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertex_shader, 1, &vertex_shader_text, nullptr);
 	glCompileShader(vertex_shader);
@@ -66,6 +75,27 @@ GLuint setup_shaders()
 	glDeleteShader(vertex_shader);
 	glDeleteShader(fragment_shader);
 
-	return shader_program;
+	this->shader_id_ = shader_program;
+}
+
+void shaders::use() const
+{
+	glUseProgram(this->shader_id_);
+}
+
+GLuint shaders::get_id() const
+{
+	return this->shader_id_;
+}
+
+void shaders::feed_mat(const char* matrix, glm::mat4 value) const
+{
+	const auto location = glGetUniformLocation(this->get_id(), matrix);
+	glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(value));
+}
+
+void shaders::feed_vec(const char* name, glm::vec3 value) const
+{
+	glUniform3fv(glGetUniformLocation(this->get_id(), name), 1, value_ptr(value));
 }
 #endif

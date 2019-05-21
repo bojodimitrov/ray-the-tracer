@@ -69,7 +69,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(ProjectName)</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)$(ProjectName)</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -134,9 +139,33 @@
     <ClCompile Include="Libraries\glad.c" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\shaders.cpp" />
+    <ClCompile Include="src\shapes.cpp" />
+    <ClCompile Include="src\structs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\shaders.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\axis_shader.fsh" />
+    <None Include="shaders\fragment_shader.fsh">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </ExcludedFromBuild>
+    </None>
+    <None Include="shaders\vertex_shader.vsh" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="shaders\lighting_shader.fsh" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\lighting_shader.vsh">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </ExcludedFromBuild>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

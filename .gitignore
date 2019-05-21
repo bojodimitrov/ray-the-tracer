@@ -1,5 +1,7 @@
 # Files
-.exe
+*.exe
+*.ilk
+*.pdb
 
 # Folders
 .vs
