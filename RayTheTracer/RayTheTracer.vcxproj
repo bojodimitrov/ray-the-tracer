@@ -137,7 +137,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Libraries\glad.c" />
+    <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\material.cpp" />
     <ClCompile Include="src\shaders.cpp" />
     <ClCompile Include="src\shapes.cpp" />
     <ClCompile Include="src\structs.cpp" />
@@ -165,6 +167,11 @@
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </ExcludedFromBuild>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\axis_shader.vsh">
+      <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
