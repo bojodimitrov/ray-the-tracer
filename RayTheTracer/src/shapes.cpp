@@ -187,32 +187,8 @@ class sphere : public shape
 public:
 	sphere(const material* mat, const int density)
 	{
-		//this->vertices_ = new point[this->number_of_vertices_ * 3];
 		auto vertices = std::vector<point>();
-
-		/*for (auto i = 0; i < density; i++)
-		{
-			const auto phi = 180.0f / density;
-			const auto theta = i * 2 * glm::pi<float>() / density;
-			const auto theta_next = (i + 1) * 2 * glm::pi<float>() / density;
-
-			auto x = cos(phi) * cos(theta);
-			auto y = cos(phi) * sin(theta);
-			auto z = sin(phi);
-			vertices.emplace_back(0.0f, 0.0f, sin(90.0f));
-			vertices.emplace_back(mat->dye().x, mat->dye().y, mat->dye().z);
-			vertices.emplace_back(0.0f, 0.0f, sin(0.0f));
-
-			vertices.emplace_back(x, y, z);
-			vertices.emplace_back(mat->dye().x, mat->dye().y, mat->dye().z);
-			vertices.emplace_back(x, y, z);
-
-			vertices.emplace_back(cos(phi) * cos(theta_next), cos(phi) * sin(theta_next), z);
-			vertices.emplace_back(mat->dye().x, mat->dye().y, mat->dye().z);
-			vertices.emplace_back(cos(phi) * cos(theta_next), cos(phi) * sin(theta_next), z);
-		}*/
-
-		for (auto i = - (density / 2) + 1; i < density / 2; i++)
+		for (auto i = - (density / 2); i < density / 2; i++)
 		{
 			for (auto j = 0; j < density; j++)
 			{

@@ -107,7 +107,7 @@ int main()
 	const auto axis_shader = new shaders("./shaders/axis_shader.vsh", "./shaders/axis_shader.fsh");
 	const auto cam = new camera();
 	cam->rotate(-50.0f, vec3(1.0f, 0.0f, 0.0f));
-	cam->rotate(-30.0f, vec3(0.0f, 0.0f, 1.0f));
+	cam->rotate(-130.0f, vec3(0.0f, 0.0f, 1.0f));
 	cam->scale(1.4f);
 
 	GLuint vertex_buffer, vertex_array, light_vertex_array, axis_array;
@@ -121,7 +121,7 @@ int main()
 
 	glEnable(GL_DEPTH_TEST);
 
-	const auto light_position = vec3(1.2f, 1.2f, 0.3f);
+	const auto light_position = vec3(1.2f, 0.0f, 0.3f);
 	auto light_world_position = vec3(light_position);
 
 	general_shader->use();
@@ -134,9 +134,8 @@ int main()
 	const auto light = new material(0.0f, 0.0f, 1.0f, light_props->specular_color);
 
 	shape* rect = new cuboid(gold);
-	shape* sph = new sphere(&material(0.5f, 0.0f, 0.5f, vec3(1.0f, 0.1f, 0.7f)), 100);
+	shape* sph = new sphere(gold, 100);
 	shape* light_source = new cuboid(light);
-
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -174,7 +173,7 @@ int main()
 		
 
 		// move
-		light_source->rotate(float(glfwGetTime()) * 30.0f, vec3(0.0f, 0.0f, 1.0f));
+		light_source->rotate(float(glfwGetTime()) * 30.0f, vec3(0.0f, 1.0f, 0.0f));
 		light_source->translate(light_position);
 		light_source->scale(vec3(0.1f, 0.1f, 0.1f));
 
