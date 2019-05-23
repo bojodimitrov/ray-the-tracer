@@ -98,4 +98,9 @@ void shaders::feed_vec(const char* name, glm::vec3 value) const
 {
 	glUniform3fv(glGetUniformLocation(this->get_id(), name), 1, value_ptr(value));
 }
+
+void shaders::feed_float(const char* name, const float value) const
+{
+	glUniform1f(glGetUniformLocation(this->get_id(), name), value);
+}
 #endif

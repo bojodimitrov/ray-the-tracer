@@ -27,6 +27,7 @@ class cuboid : public shape
 	int number_of_vertices_;
 	mat4 model_{};
 	mat4 memory_model_{};
+	material* material_;
 
 public:
 	cuboid(const material* mat)
@@ -108,6 +109,8 @@ public:
 
 		this->model_ = mat4(1.0f);
 		this->memory_model_ = mat4(1.0f);
+
+		this->material_ = new material(mat->absorb(), mat->refract(), mat->reflect(), mat->dye());
 	}
 
 	void sculpt(const vec3 dimensions) override
@@ -146,6 +149,10 @@ public:
 	void draw(const shaders* shader) override
 	{
 		shader->feed_mat("model", this->model_);
+		shader->feed_vec("material.ambient", this->material_->dye());
+		shader->feed_vec("material.diffuse", this->material_->dye());
+		shader->feed_vec("material.specular", vec3(0.5f));
+		shader->feed_float("material.shininess", 128.0f);
 
 		glBufferData(GL_ARRAY_BUFFER, sizeof(point) * this->number_of_vertices_ * 3, this->vertices_, GL_STATIC_DRAW);
 		glDrawArrays(GL_TRIANGLES, 0, this->number_of_vertices_);
@@ -161,6 +168,7 @@ public:
 	~cuboid()
 	{
 		delete this->vertices_;
+		delete this->material_;
 	}
 };
 

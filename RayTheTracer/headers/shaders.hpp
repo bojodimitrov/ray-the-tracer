@@ -15,4 +15,5 @@ public:
 	GLuint get_id() const;
 	void feed_mat(const char*, glm::mat4) const;
 	void feed_vec(const char*, glm::vec3) const;
+	void feed_float(const char*, float) const;
 };

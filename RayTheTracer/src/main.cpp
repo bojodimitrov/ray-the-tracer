@@ -121,7 +121,7 @@ int main()
 	const auto lighting_shader = new shaders("./shaders/lighting_shader.vsh", "./shaders/lighting_shader.fsh");
 	const auto axis_shader = new shaders("./shaders/axis_shader.vsh", "./shaders/axis_shader.fsh");
 	const auto cam = new camera();
-	cam->rotate(-30.0f, vec3(1.0f, 0.0f, 0.0f));
+	cam->rotate(-10.0f, vec3(1.0f, 0.0f, 0.0f));
 	cam->rotate(-30.0f, vec3(0.0f, 0.0f, 1.0f));
 	cam->scale(1.8f);
 
@@ -143,7 +143,10 @@ int main()
 	general_shader->feed_vec("light_pos", light_position);
 
 	const auto gold = new material(0.5f, 0.0f, 0.5f, vec3(1.0f, 0.83f, 0.3f));
-	const auto light = new material(1.0f, 0.0f, 0.0f, vec3(1.0f, 1.0f, 1.0f));
+
+	const auto light_color = vec3(1.0f, 1.0f, 1.0f);
+	const auto light_props = new light_properties(light_color * vec3(0.5f), light_color * vec3(0.05f), light_color);
+	const auto light = new material(0.0f, 0.0f, 1.0f, light_props->specular_color);
 
 	shape* rect = new cuboid(gold);
 	shape* light_source = new cuboid(light);
@@ -162,9 +165,11 @@ int main()
 		general_shader->use();
 		general_shader->feed_mat("view", cam->get_view_matrix());
 		general_shader->feed_mat("projection", proj_mat);
-		general_shader->feed_vec("light_color", vec3(1.0f, 1.0f, 1.0f));
 		general_shader->feed_vec("view_pos", cam->get_position());
-		general_shader->feed_vec("light_pos", light_world_position);
+		general_shader->feed_vec("light.position", light_world_position);
+		general_shader->feed_vec("light.ambient", light_props->ambient_color);
+		general_shader->feed_vec("light.diffuse", light_props->diffusion_color);
+		general_shader->feed_vec("light.specular", light_props->specular_color);
 
 		//rect->rotate(float(glfwGetTime()) * 15.0f, vec3(0.0f, 0.0f, 1.0f));
 		rect->draw(general_shader);
@@ -180,9 +185,13 @@ int main()
 		lighting_shader->use();
 		lighting_shader->feed_mat("view", cam->get_view_matrix());
 		lighting_shader->feed_mat("projection", proj_mat);
+		
+
+		// move
 		light_source->rotate(float(glfwGetTime()) * 30.0f, vec3(0.0f, 0.0f, 1.0f));
 		light_source->translate(light_position);
 		light_source->scale(vec3(0.1f, 0.1f, 0.1f));
+
 
 		light_world_position = light_source->get_location();
 		light_source->draw(lighting_shader);
@@ -196,6 +205,7 @@ int main()
 	delete light;
 	delete cam;
 	delete light_source;
+	delete light_props;
 	delete general_shader;
 	delete lighting_shader;
 	delete axis_shader;
