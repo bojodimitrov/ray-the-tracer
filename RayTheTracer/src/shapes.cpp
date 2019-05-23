@@ -6,6 +6,9 @@
 #include <../src/material.cpp>
 #include <glad/glad.h>
 #include <iostream>
+#include <vector>
+
+const double pi = 3.1415926535897;
 
 class shape
 {
@@ -172,7 +175,147 @@ public:
 	}
 };
 
-class sphere
+class sphere : public shape
 {
+	point location_;
+	point* vertices_;
+	int number_of_vertices_;
+	mat4 model_{};
+	mat4 memory_model_{};
+	material* material_;
 
+public:
+	sphere(const material* mat, const int density)
+	{
+		//this->vertices_ = new point[this->number_of_vertices_ * 3];
+		auto vertices = std::vector<point>();
+
+		/*for (auto i = 0; i < density; i++)
+		{
+			const auto phi = 180.0f / density;
+			const auto theta = i * 2 * glm::pi<float>() / density;
+			const auto theta_next = (i + 1) * 2 * glm::pi<float>() / density;
+
+			auto x = cos(phi) * cos(theta);
+			auto y = cos(phi) * sin(theta);
+			auto z = sin(phi);
+			vertices.emplace_back(0.0f, 0.0f, sin(90.0f));
+			vertices.emplace_back(mat->dye().x, mat->dye().y, mat->dye().z);
+			vertices.emplace_back(0.0f, 0.0f, sin(0.0f));
+
+			vertices.emplace_back(x, y, z);
+			vertices.emplace_back(mat->dye().x, mat->dye().y, mat->dye().z);
+			vertices.emplace_back(x, y, z);
+
+			vertices.emplace_back(cos(phi) * cos(theta_next), cos(phi) * sin(theta_next), z);
+			vertices.emplace_back(mat->dye().x, mat->dye().y, mat->dye().z);
+			vertices.emplace_back(cos(phi) * cos(theta_next), cos(phi) * sin(theta_next), z);
+		}*/
+
+		for (auto i = - (density / 2) + 1; i < density / 2; i++)
+		{
+			for (auto j = 0; j < density; j++)
+			{
+				const auto phi = i * (glm::pi<float>() / density);
+				const auto phi_next = (i + 1) * (glm::pi<float>() / density);
+				const auto theta = j * 2 * glm::pi<float>() / density;
+				const auto theta_next = (j + 1) * 2 * glm::pi<float>() / density;
+
+				auto x = cos(phi) * cos(theta);
+				auto y = cos(phi) * sin(theta);
+				auto z = sin(phi);
+				vertices.emplace_back(cos(phi) * cos(theta), cos(phi) * sin(theta), sin(phi));
+				vertices.emplace_back(mat->dye().x, mat->dye().y, mat->dye().z);
+				vertices.emplace_back(cos(phi) * cos(theta), cos(phi) * sin(theta), sin(phi));
+
+				vertices.emplace_back(cos(phi_next) * cos(theta), cos(phi_next) * sin(theta), sin(phi_next));
+				vertices.emplace_back(mat->dye().x, mat->dye().y, mat->dye().z);
+				vertices.emplace_back(cos(phi_next) * cos(theta), cos(phi_next) * sin(theta), sin(phi_next));
+
+				vertices.emplace_back(cos(phi_next) * cos(theta_next), cos(phi_next) * sin(theta_next), sin(phi_next));
+				vertices.emplace_back(mat->dye().x, mat->dye().y, mat->dye().z);
+				vertices.emplace_back(cos(phi_next) * cos(theta_next), cos(phi_next) * sin(theta_next), sin(phi_next));
+
+				vertices.emplace_back(cos(phi) * cos(theta), cos(phi) * sin(theta), sin(phi));
+				vertices.emplace_back(mat->dye().x, mat->dye().y, mat->dye().z);
+				vertices.emplace_back(cos(phi) * cos(theta), cos(phi) * sin(theta), sin(phi));
+
+				vertices.emplace_back(cos(phi_next) * cos(theta_next), cos(phi_next) * sin(theta_next), sin(phi_next));
+				vertices.emplace_back(mat->dye().x, mat->dye().y, mat->dye().z);
+				vertices.emplace_back(cos(phi_next) * cos(theta_next), cos(phi_next) * sin(theta_next), sin(phi_next));
+
+				vertices.emplace_back(cos(phi) * cos(theta_next), cos(phi) * sin(theta_next), sin(phi));
+				vertices.emplace_back(mat->dye().x, mat->dye().y, mat->dye().z);
+				vertices.emplace_back(cos(phi) * cos(theta_next), cos(phi) * sin(theta_next), sin(phi));
+			}
+		}
+
+		this->vertices_ = new point[vertices.size()];
+		this->number_of_vertices_ = float(vertices.size() / 3);
+		for (auto i = 0; i < int(vertices.size()); i++)
+		{
+			this->vertices_[i] = point(vertices[i].x, vertices[i].y, vertices[i].z);
+		}
+
+		this->model_ = mat4(1.0f);
+		this->memory_model_ = mat4(1.0f);
+
+		this->material_ = new material(mat->absorb(), mat->refract(), mat->reflect(), mat->dye());
+	}
+
+	void sculpt(const vec3 dimensions) override
+	{
+		this->scale(dimensions, true);
+	}
+
+	void translate(const vec3 direction, const bool forever) override
+	{
+		this->model_ = glm::translate(this->model_, direction);
+		if (forever)
+		{
+			this->memory_model_ = glm::translate(this->memory_model_, direction);
+		}
+	}
+
+	void rotate(const float angle, const vec3 axis, const bool forever) override
+	{
+		// axis needs to be in normal form
+		this->model_ = glm::rotate(this->model_, radians(angle), axis);
+		if (forever)
+		{
+			this->memory_model_ = glm::rotate(this->model_, radians(angle), axis);
+		}
+	}
+
+	void scale(const vec3 vec, const bool forever) override
+	{
+		this->model_ = glm::scale(this->model_, vec);
+		if (forever)
+		{
+			this->memory_model_ = glm::scale(this->model_, vec);
+		}
+	}
+
+	void draw(const shaders* shader) override
+	{
+		shader->feed_mat("model", this->model_);
+		shader->feed_vec("material.ambient", this->material_->dye());
+		shader->feed_vec("material.diffuse", this->material_->dye());
+		shader->feed_vec("material.specular", vec3(0.3f));
+		shader->feed_float("material.shininess", 128.0f);
+
+		glBufferData(GL_ARRAY_BUFFER, sizeof(point) * this->number_of_vertices_ * 3, this->vertices_, GL_STATIC_DRAW);
+		glDrawArrays(GL_TRIANGLES, 0, this->number_of_vertices_);
+	}
+
+	vec3 get_location() const override
+	{
+		return this->model_ * vec4(this->location_.x, this->location_.y, this->location_.z, 1.0);
+	}
+
+	~sphere()
+	{
+		delete this->vertices_;
+		delete this->material_;
+	}
 };

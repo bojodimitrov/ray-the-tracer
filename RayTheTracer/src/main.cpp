@@ -79,21 +79,6 @@ void draw_coordinate_system()
 	glDrawArrays(GL_LINES, 0, 2);
 }
 
-mat4 setup_view(const vec3 view_pos)
-{
-	auto view = mat4(1.0f);
-
-	view = translate(view, view_pos);
-
-	// initially we are looking frome above
-	view = rotate(view, radians(-90.0f), vec3(1.0f, 0.0f, 0.0f));
-	view = rotate(view, radians(30.0f), vec3(1.0f, 0.0f, 0.0f));
-	view = rotate(view, radians(-30.0f), vec3(0.0f, 0.0f, 1.0f));
-
-	return view;
-}
-
-
 void generate_vertex_array(GLuint *vertex_array, const int triplets)
 {
 	glGenVertexArrays(1, vertex_array);
@@ -121,9 +106,9 @@ int main()
 	const auto lighting_shader = new shaders("./shaders/lighting_shader.vsh", "./shaders/lighting_shader.fsh");
 	const auto axis_shader = new shaders("./shaders/axis_shader.vsh", "./shaders/axis_shader.fsh");
 	const auto cam = new camera();
-	cam->rotate(-10.0f, vec3(1.0f, 0.0f, 0.0f));
+	cam->rotate(-50.0f, vec3(1.0f, 0.0f, 0.0f));
 	cam->rotate(-30.0f, vec3(0.0f, 0.0f, 1.0f));
-	cam->scale(1.8f);
+	cam->scale(1.4f);
 
 	GLuint vertex_buffer, vertex_array, light_vertex_array, axis_array;
 	glGenBuffers(1, &vertex_buffer);
@@ -145,10 +130,11 @@ int main()
 	const auto gold = new material(0.5f, 0.0f, 0.5f, vec3(1.0f, 0.83f, 0.3f));
 
 	const auto light_color = vec3(1.0f, 1.0f, 1.0f);
-	const auto light_props = new light_properties(light_color * vec3(0.5f), light_color * vec3(0.05f), light_color);
+	const auto light_props = new light_properties(light_color * vec3(0.2f), light_color * vec3(0.5f), light_color);
 	const auto light = new material(0.0f, 0.0f, 1.0f, light_props->specular_color);
 
 	shape* rect = new cuboid(gold);
+	shape* sph = new sphere(&material(0.5f, 0.0f, 0.5f, vec3(1.0f, 0.1f, 0.7f)), 100);
 	shape* light_source = new cuboid(light);
 
 
@@ -172,7 +158,7 @@ int main()
 		general_shader->feed_vec("light.specular", light_props->specular_color);
 
 		//rect->rotate(float(glfwGetTime()) * 15.0f, vec3(0.0f, 0.0f, 1.0f));
-		rect->draw(general_shader);
+		sph->draw(general_shader);
 
 		glBindVertexArray(axis_array);
 		axis_shader->use();
@@ -201,6 +187,7 @@ int main()
 	}
 
 	delete rect;
+	delete sph;
 	delete gold;
 	delete light;
 	delete cam;
