@@ -5,10 +5,10 @@
 #include <../headers/shaders.hpp>
 #include <../src/material.cpp>
 #include <glad/glad.h>
-#include <iostream>
 #include <vector>
 
 const double pi = 3.1415926535897;
+
 
 class shape
 {
@@ -18,15 +18,117 @@ public:
 	virtual void rotate(float, vec3, bool = false) = 0;
 	virtual void scale(vec3, bool = false) = 0;
 	virtual void draw(const shaders*) = 0;
-	virtual vec3 get_location() const = 0;
 	virtual ~shape() {}
 };
 
+class wall : public shape
+{
+	point* vertices_;
+	mat4 model_{};
+	mat4 memory_model_{};
+	material* material_;
+	int number_of_vertices_;
+
+public:
+	wall(const material* mat)
+	{
+		this->number_of_vertices_ = 6;
+		this->vertices_ = new point[this->number_of_vertices_ * 3];
+
+		this->vertices_[0] = point(-0.5f, -0.5f, 0.0f);
+		this->vertices_[3] = point(0.5f, -0.5f, 0.0f);
+		this->vertices_[6] = point(-0.5f, 0.5f, 0.0f);
+
+		this->vertices_[9] = point(0.5f, 0.5f, 0.0f);
+		this->vertices_[12] = point(0.5f, -0.5f, 0.0f);
+		this->vertices_[15] = point(-0.5f, 0.5f, 0.0f);
+
+		for (auto i = 2; i < this->number_of_vertices_ * 3; i += 3)
+		{
+			this->vertices_[i] = point(0, 0, 1);
+		}
+		for (auto i = 1; i < this->number_of_vertices_ * 3; i += 3)
+		{
+			this->vertices_[i] = point(mat->dye().r, mat->dye().g, mat->dye().b);
+		}
+
+		this->model_ = mat4(1.0f);
+		this->memory_model_ = mat4(1.0f);
+
+		this->material_ = new material(mat->absorb(), mat->refract(), mat->reflect(), mat->dye());
+	}
+
+	void sculpt(const vec3 dimensions) override
+	{
+		this->scale(dimensions, true);
+	}
+
+	void translate(const vec3 direction, const bool forever) override
+	{
+		this->model_ = glm::translate(this->model_, direction);
+		if (forever)
+		{
+			this->memory_model_ = glm::translate(this->memory_model_, direction);
+		}
+	}
+
+	void rotate(const float angle, const vec3 axis, const bool forever) override
+	{
+		// axis needs to be in normal form
+		this->model_ = glm::rotate(this->model_, radians(angle), axis);
+		if (forever)
+		{
+			this->memory_model_ = glm::rotate(this->memory_model_, radians(angle), axis);
+		}
+	}
+
+	void scale(const vec3 vec, const bool forever) override
+	{
+		this->model_ = glm::scale(this->model_, vec);
+		if (forever)
+		{
+			this->memory_model_ = glm::scale(this->memory_model_, vec);
+		}
+	}
+
+	void draw(const shaders* shader) override
+	{
+		shader->feed_mat("model", this->model_);
+		shader->feed_vec("material.ambient", this->material_->dye());
+		shader->feed_vec("material.diffuse", this->material_->dye());
+		shader->feed_vec("material.specular", vec3(0.5f));
+		shader->feed_float("material.shininess", 128.0f);
+
+		glBufferData(GL_ARRAY_BUFFER, sizeof(point) * this->number_of_vertices_ * 3, this->vertices_, GL_STATIC_DRAW);
+		glDrawArrays(GL_TRIANGLES, 0, this->number_of_vertices_);
+
+		this->model_ = mat4(this->memory_model_);
+	}
+
+	vec3 get_corner(int bottom, int top) const
+	{
+		if (bottom != 0 && bottom != 1)
+		{
+			bottom = 0;
+		}
+		if (top != 0 && top != 1)
+		{
+			top = 0;
+		}
+		const auto index = bottom * 3 + top * 6;
+		return this->model_ * vec4(this->vertices_[index].x, this->vertices_[index].y, this->vertices_[index].z, 1.0f);
+	}
+
+	~wall()
+	{
+		delete this->vertices_;
+		delete this->material_;
+	}
+};
 
 class cuboid : public shape
 {
 	point* vertices_;
-	point location_;
 	int number_of_vertices_;
 	mat4 model_{};
 	mat4 memory_model_{};
@@ -37,7 +139,6 @@ public:
 	{
 		this->number_of_vertices_ = 36;
 		this->vertices_ = new point[this->number_of_vertices_ * 3];
-		this->location_ = point(0.0f, 0.0f, 0.0f);
 
 		// floor
 		this->vertices_[0] = point(-0.5f, -0.5f, -0.5f);
@@ -136,7 +237,7 @@ public:
 		this->model_ = glm::rotate(this->model_, radians(angle), axis);
 		if (forever)
 		{
-			this->memory_model_ = glm::rotate(this->model_, radians(angle), axis);
+			this->memory_model_ = glm::rotate(this->memory_model_, radians(angle), axis);
 		}
 	}
 
@@ -145,7 +246,7 @@ public:
 		this->model_ = glm::scale(this->model_, vec);
 		if (forever)
 		{
-			this->memory_model_ = glm::scale(this->model_, vec);
+			this->memory_model_ = glm::scale(this->memory_model_, vec);
 		}
 	}
 
@@ -163,11 +264,6 @@ public:
 		this->model_ = mat4(this->memory_model_);
 	}
 
-	vec3 get_location() const override
-	{
-		return this->model_ * vec4(this->location_.x, this->location_.y, this->location_.z, 1.0);
-	}
-
 	~cuboid()
 	{
 		delete this->vertices_;
@@ -177,7 +273,6 @@ public:
 
 class sphere : public shape
 {
-	point location_;
 	point* vertices_;
 	int number_of_vertices_;
 	mat4 model_{};
@@ -188,7 +283,7 @@ public:
 	sphere(const material* mat, const int density)
 	{
 		auto vertices = std::vector<point>();
-		for (auto i = - (density / 2); i < density / 2; i++)
+		for (auto i = -(density / 2); i < density / 2; i++)
 		{
 			for (auto j = 0; j < density; j++)
 			{
@@ -197,9 +292,6 @@ public:
 				const auto theta = j * 2 * glm::pi<float>() / density;
 				const auto theta_next = (j + 1) * 2 * glm::pi<float>() / density;
 
-				auto x = cos(phi) * cos(theta);
-				auto y = cos(phi) * sin(theta);
-				auto z = sin(phi);
 				vertices.emplace_back(cos(phi) * cos(theta), cos(phi) * sin(theta), sin(phi));
 				vertices.emplace_back(mat->dye().x, mat->dye().y, mat->dye().z);
 				vertices.emplace_back(cos(phi) * cos(theta), cos(phi) * sin(theta), sin(phi));
@@ -259,7 +351,7 @@ public:
 		this->model_ = glm::rotate(this->model_, radians(angle), axis);
 		if (forever)
 		{
-			this->memory_model_ = glm::rotate(this->model_, radians(angle), axis);
+			this->memory_model_ = glm::rotate(this->memory_model_, radians(angle), axis);
 		}
 	}
 
@@ -268,7 +360,7 @@ public:
 		this->model_ = glm::scale(this->model_, vec);
 		if (forever)
 		{
-			this->memory_model_ = glm::scale(this->model_, vec);
+			this->memory_model_ = glm::scale(this->memory_model_, vec);
 		}
 	}
 
@@ -282,11 +374,13 @@ public:
 
 		glBufferData(GL_ARRAY_BUFFER, sizeof(point) * this->number_of_vertices_ * 3, this->vertices_, GL_STATIC_DRAW);
 		glDrawArrays(GL_TRIANGLES, 0, this->number_of_vertices_);
+
+		this->model_ = mat4(this->memory_model_);
 	}
 
-	vec3 get_location() const override
+	vec3 get_centre() const
 	{
-		return this->model_ * vec4(this->location_.x, this->location_.y, this->location_.z, 1.0);
+		return this->model_ * vec4(0.0f, 0.0f, 0.0f, 1.0);
 	}
 
 	~sphere()

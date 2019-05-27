@@ -138,6 +138,7 @@
   <ItemGroup>
     <ClCompile Include="Libraries\glad.c" />
     <ClCompile Include="src\camera.cpp" />
+    <ClCompile Include="src\light.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\material.cpp" />
     <ClCompile Include="src\shaders.cpp" />
